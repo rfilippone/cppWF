@@ -15,6 +15,7 @@
 
 
 Configuration* Configuration::m_instance = NULL;
+const std::string Configuration::APPLICATION_ENV_VAR("APPLICATION_ENV");
 
 Configuration::Configuration()
 {
@@ -28,7 +29,7 @@ Configuration::~Configuration()
 
 std::string Configuration::get(const std::string& name)
 {
-    return instance()._get("", name);
+    return instance()._get(name);
 }
 
 void Configuration::setInstance(Configuration* instance)
@@ -79,7 +80,7 @@ void Configuration::_load_ini(SectionMap& sectionMap, const boost::property_tree
             SectionMap subSectionMap(std::make_pair(parent, parametersMap)); //parent is root section
             _load_ini(subSectionMap, v.second);
 
-            configurationMap.insert(std::make_pair(strs[0],subSectionMap));
+            m_configurationMap.insert(std::make_pair(strs[0],subSectionMap));
         }
     }
 }
@@ -96,29 +97,37 @@ void Configuration::_init(const std::string& fileName)
     SectionMap sectionMap(std::make_pair("~", parametersMap)); //no parent
     _load_ini(sectionMap, pt);
 
-    configurationMap.insert(std::make_pair("",sectionMap)); // root section
+    m_configurationMap.insert(std::make_pair("",sectionMap)); // root section
+
+    char* var = getenv(APPLICATION_ENV_VAR.c_str());
+    std::string env(var ? var : "");
+
+    while(env != "~")
+    {
+        ConfigurationMap::iterator section = m_configurationMap.find(env);
+        if (section == m_configurationMap.end())
+        {
+            throw std::invalid_argument("Unknown configuration section name " + env);
+        }
+
+        BOOST_FOREACH(ParametersMap::value_type& value, section->second.second)
+        {
+            if (m_parametersMap.find(value.first) == m_parametersMap.end())
+            {
+                m_parametersMap.insert(value);
+            }
+        }
+
+        env = section->second.first;
+    }
 }
 
-
-std::string Configuration::_get(const std::string& sectionName, const std::string& name)
+std::string Configuration::_get(const std::string& name)
 {
-    ConfigurationMap::iterator section = configurationMap.find(sectionName);
-    if (section == configurationMap.end())
+    ParametersMap::iterator entry = m_parametersMap.find(name);
+    if (entry == m_parametersMap.end())
     {
-        throw std::invalid_argument("Unknown configuration section name " + sectionName);
-    }
-
-    ParametersMap::iterator entry = section->second.second.find(name);
-    if (entry == section->second.second.end())
-    {
-        if (section->second.first == "~")
-        {
-            throw std::invalid_argument("Unknown configuration parameters name " + name);
-        }
-        else
-        {
-            return _get(section->second.first, name);
-        }
+        throw std::invalid_argument("Unknown configuration parameters name " + name);
     }
     else
     {
@@ -127,3 +136,4 @@ std::string Configuration::_get(const std::string& sectionName, const std::strin
 
     return "";
 }
+

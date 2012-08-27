@@ -25,6 +25,8 @@ public:
 
     static void setInstance(Configuration* instance);
 
+    static const std::string APPLICATION_ENV_VAR;
+
 protected:
     static Configuration& instance();
 
@@ -34,10 +36,12 @@ private:
 //move to impl
 private:
     void _init(const std::string& fileName);
-    std::string _get(const std::string& sectionName, const std::string& name);
+    //std::string _get(const std::string& sectionName, const std::string& name);
+    std::string _get(const std::string& name);
     void _load_ini(SectionMap& sectionMap, const boost::property_tree::ptree& pt);
 
-    ConfigurationMap configurationMap;
+    ConfigurationMap m_configurationMap;
+    ParametersMap m_parametersMap;
 };
 
 #endif /* CONFIGURATION_H_ */
