@@ -39,7 +39,7 @@ int handle_request(boost::fcgi::request& req)
         ActionInvoker::invoke(sController, sAction, req, resp);
     }
     catch (controller_not_found& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << boost::diagnostic_information(e) << std::endl;
 
         resp.reset();
         resp.set_header("Status", "404");
@@ -48,7 +48,7 @@ int handle_request(boost::fcgi::request& req)
         resp << boost::diagnostic_information(e);
     }
     catch (action_not_found& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << boost::diagnostic_information(e) << std::endl;
 
         resp.reset();
         resp.set_header("Status", "404");
@@ -60,7 +60,7 @@ int handle_request(boost::fcgi::request& req)
 
     }
     catch (exception_base& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << boost::diagnostic_information(e) << std::endl;
 
         resp.reset();
         resp.set_header("Status", "500");
