@@ -1,4 +1,4 @@
-.PHONY: all install
+.PHONY: all install clean
 
 .DEFAULT_GOAL:= all
 
@@ -6,9 +6,10 @@ config ?= debug
 target = cppWF
 srcs_dir = src
 
-BOOST_CGI_INC:=../cgi
+INCLUDES:=-I$(BOOST_CGI_INC) $(BOOST_INC)
 
-INCLUDES:=-I$(BOOST_CGI_INC)
+LD_FLAGS:=-z muldefs $(BOOST_LIB_DIR)
+LIBS:=-lboost_system -lboost_filesystem
 
 srcs:=$(wildcard $(srcs_dir)/*.cpp)
 
@@ -43,7 +44,7 @@ $(install_dest) : $(artifact)
 	cp $< $@
 	
 $(artifact): $(objs_dir) $(objs_subdirs) $(objs)
-	$(CXX) $(objs) -o $@ -z muldefs -lboost_system -lboost_filesystem
+	$(CXX) $(objs) -o $@ $(LD_FLAGS) $(LIBS)
 
 $(objs_dir)/%.o : %.cpp
 	$(CXX) -c $< -o $@ $(INCLUDES)
