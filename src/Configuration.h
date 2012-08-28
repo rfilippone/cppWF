@@ -36,7 +36,6 @@ private:
 //move to impl
 private:
     void _init(const std::string& fileName);
-    //std::string _get(const std::string& sectionName, const std::string& name);
     std::string _get(const std::string& name);
     void _load_ini(SectionMap& sectionMap, const boost::property_tree::ptree& pt);
 

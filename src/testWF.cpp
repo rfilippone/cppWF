@@ -55,9 +55,6 @@ int handle_request(boost::fcgi::request& req)
 
         resp << "Action not found.\n";
         resp << boost::diagnostic_information(e);
-        resp << req.uri() << "\n";
-        resp << req.query_string() << "\n";
-
     }
     catch (exception_base& e) {
         std::cerr << boost::diagnostic_information(e) << std::endl;
