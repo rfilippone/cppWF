@@ -39,6 +39,8 @@ private:
     std::string _get(const std::string& name);
     void _load_ini(SectionMap& sectionMap, const boost::property_tree::ptree& pt);
 
+    std::time_t m_lastTime;
+
     ConfigurationMap m_configurationMap;
     ParametersMap m_parametersMap;
 };

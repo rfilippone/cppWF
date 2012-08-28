@@ -11,13 +11,15 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include "Exception.h"
 #include "Configuration.h"
 
 
 Configuration* Configuration::m_instance = NULL;
 const std::string Configuration::APPLICATION_ENV_VAR("APPLICATION_ENV");
 
-Configuration::Configuration()
+Configuration::Configuration():
+        m_lastTime(0)
 {
 
 }
@@ -42,10 +44,11 @@ Configuration& Configuration::instance()
 {
     if (m_instance == NULL)
     {
-        std::cerr << "***** loading configuration" << std::endl;
         m_instance = new Configuration();
-        m_instance->_init("../configs/application.ini");
     }
+
+    m_instance->_init("../configs/application.ini");
+
     return *m_instance;
 }
 
@@ -89,36 +92,51 @@ void Configuration::_load_ini(SectionMap& sectionMap, const boost::property_tree
 void Configuration::_init(const std::string& fileName)
 {
     boost::filesystem::path config(boost::filesystem::current_path() / fileName);
-
-    boost::property_tree::ptree pt;
-    boost::property_tree::ini_parser::read_ini(config.string(), pt);
-
-    ParametersMap parametersMap;
-    SectionMap sectionMap(std::make_pair("~", parametersMap)); //no parent
-    _load_ini(sectionMap, pt);
-
-    m_configurationMap.insert(std::make_pair("",sectionMap)); // root section
-
-    char* var = getenv(APPLICATION_ENV_VAR.c_str());
-    std::string env(var ? var : "");
-
-    while(env != "~")
+    if (boost::filesystem::exists(config))
     {
-        ConfigurationMap::iterator section = m_configurationMap.find(env);
-        if (section == m_configurationMap.end())
+        if (boost::filesystem::last_write_time(config) > m_lastTime)
         {
-            throw std::invalid_argument("Unknown configuration section name " + env);
-        }
+            m_lastTime =  boost::filesystem::last_write_time(config);
 
-        BOOST_FOREACH(ParametersMap::value_type& value, section->second.second)
-        {
-            if (m_parametersMap.find(value.first) == m_parametersMap.end())
+            std::cerr << "***** loading configuration" << std::endl;
+            m_configurationMap.clear();
+            m_parametersMap.clear();
+
+            boost::property_tree::ptree pt;
+            boost::property_tree::ini_parser::read_ini(config.string(), pt);
+
+            ParametersMap parametersMap;
+            SectionMap sectionMap(std::make_pair("~", parametersMap)); //no parent
+            _load_ini(sectionMap, pt);
+
+            m_configurationMap.insert(std::make_pair("",sectionMap)); // root section
+
+            char* var = getenv(APPLICATION_ENV_VAR.c_str());
+            std::string env(var ? var : "");
+
+            while(env != "~")
             {
-                m_parametersMap.insert(value);
+                ConfigurationMap::iterator section = m_configurationMap.find(env);
+                if (section == m_configurationMap.end())
+                {
+                    throw std::invalid_argument("Unknown configuration section name " + env);
+                }
+
+                BOOST_FOREACH(ParametersMap::value_type& value, section->second.second)
+                {
+                    if (m_parametersMap.find(value.first) == m_parametersMap.end())
+                    {
+                        m_parametersMap.insert(value);
+                    }
+                }
+
+                env = section->second.first;
             }
         }
-
-        env = section->second.first;
+    }
+    else
+    {
+        BOOST_THROW_EXCEPTION(configuration_not_found() << msg_info("Configuration file not found: " + fileName));
     }
 }
 
