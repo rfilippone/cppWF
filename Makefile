@@ -7,7 +7,9 @@ config ?= debug
 target = cppWF
 srcs_dir = src examples
 
-INCLUDES:=-Isrc -I$(BOOST_CGI_INC) $(BOOST_INC)
+CXX_FLAGS:=-Wall
+
+INCLUDES:=-Isrc $(BOOST_CGI_INC) $(BOOST_INC)
 
 LD_FLAGS:=-z muldefs $(BOOST_LIB_DIR)
 LIBS:=-lboost_system -lboost_filesystem
@@ -48,7 +50,7 @@ $(artifact): $(objs_dir) $(objs_subdirs) $(objs)
 	$(CXX) $(objs) -o $@ $(LD_FLAGS) $(LIBS)
 
 $(objs_dir)/%.o : %.cpp
-	$(CXX) -c $< -o $@ $(INCLUDES) -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$@"
+	$(CXX) -c $< -o $@ $(CXX_FLAGS) $(INCLUDES) -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$@"
 
 clean:
 	rm -f $(artifact)
