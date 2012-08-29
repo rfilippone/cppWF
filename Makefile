@@ -3,15 +3,16 @@
 .DEFAULT_GOAL:= all
 
 config ?= debug
-target = cppWF
-srcs_dir = src
 
-INCLUDES:=-I$(BOOST_CGI_INC) $(BOOST_INC)
+target = cppWF
+srcs_dir = src examples
+
+INCLUDES:=-Isrc -I$(BOOST_CGI_INC) $(BOOST_INC)
 
 LD_FLAGS:=-z muldefs $(BOOST_LIB_DIR)
 LIBS:=-lboost_system -lboost_filesystem
 
-srcs:=$(wildcard $(srcs_dir)/*.cpp)
+srcs:=$(foreach dir,$(srcs_dir), $(wildcard $(dir)/*.cpp))
 
 build_dir=build
 config_dir=$(build_dir)/$(config)
