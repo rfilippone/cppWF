@@ -17,6 +17,7 @@
 
 Configuration* Configuration::m_instance = NULL;
 const std::string Configuration::APPLICATION_ENV_VAR("APPLICATION_ENV");
+std::string Configuration::m_file;
 
 Configuration::Configuration():
         m_lastTime(0)
@@ -28,6 +29,12 @@ Configuration::~Configuration()
 {
     delete m_instance;
 }
+
+void Configuration::setFile(std::string file)
+{
+    m_file = file;
+}
+
 
 std::string Configuration::get(const std::string& name)
 {
@@ -47,7 +54,7 @@ Configuration& Configuration::instance()
         m_instance = new Configuration();
     }
 
-    m_instance->_init("../configs/application.ini");
+    m_instance->_init(m_file);
 
     return *m_instance;
 }

@@ -21,6 +21,8 @@ public:
     Configuration();
     virtual ~Configuration();
 
+    static void setFile(std::string file);
+
     static std::string get(const std::string& name);
 
     static void setInstance(Configuration* instance);
@@ -31,6 +33,7 @@ protected:
     static Configuration& instance();
 
 private:
+    static std::string m_file;
     static Configuration* m_instance;
 
 //move to impl

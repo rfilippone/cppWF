@@ -7,6 +7,8 @@
 
 #include <string>
 
+#include "boost/cgi/fcgi.hpp"
+
 class IBootstrap;
 
 class Application
@@ -22,8 +24,14 @@ public:
     void run();
 
 private:
+    int handle_request(boost::fcgi::request& req);
+
+private:
     std::string m_configuration;
     boost::shared_ptr<IBootstrap> m_bootstrap;
 };
+
+int entryPoint();
+
 
 #endif /* APPLICATION_H_ */
