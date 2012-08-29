@@ -38,6 +38,8 @@ private:
     void _init(const std::string& fileName);
     std::string _get(const std::string& name);
 
+    std::time_t m_lastTime;
+
     RoutesMap m_routesMap;
 };
 

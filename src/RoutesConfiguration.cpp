@@ -16,7 +16,8 @@
 
 RoutesConfiguration* RoutesConfiguration::m_instance = NULL;
 
-RoutesConfiguration::RoutesConfiguration()
+RoutesConfiguration::RoutesConfiguration():
+        m_lastTime(0)
 {
 
 }
@@ -42,8 +43,10 @@ RoutesConfiguration& RoutesConfiguration::instance()
     if (m_instance == NULL)
     {
         m_instance = new RoutesConfiguration();
-        m_instance->_init("../configs/routes.ini");
     }
+
+    m_instance->_init("../configs/routes.ini");
+
     return *m_instance;
 }
 
@@ -53,14 +56,20 @@ void RoutesConfiguration::_init(const std::string& fileName)
 
     if (boost::filesystem::exists(config))
     {
-        std::cerr << "***** loading routes configuration" << std::endl;
-
-        boost::property_tree::ptree pt;
-        boost::property_tree::ini_parser::read_ini(config.string(), pt);
-
-        BOOST_FOREACH(boost::property_tree::ptree::value_type route, pt)
+        if (boost::filesystem::last_write_time(config) > m_lastTime)
         {
-            m_routesMap.insert(std::make_pair(route.first, route.second.data()));
+            m_lastTime =  boost::filesystem::last_write_time(config);
+
+            std::cerr << "***** loading routes configuration" << std::endl;
+            m_routesMap.clear();
+
+            boost::property_tree::ptree pt;
+            boost::property_tree::ini_parser::read_ini(config.string(), pt);
+
+            BOOST_FOREACH(boost::property_tree::ptree::value_type route, pt)
+            {
+                m_routesMap.insert(std::make_pair(route.first, route.second.data()));
+            }
         }
     }
 }
