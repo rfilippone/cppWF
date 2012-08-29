@@ -48,10 +48,12 @@ $(artifact): $(objs_dir) $(objs_subdirs) $(objs)
 	$(CXX) $(objs) -o $@ $(LD_FLAGS) $(LIBS)
 
 $(objs_dir)/%.o : %.cpp
-	$(CXX) -c $< -o $@ $(INCLUDES)
+	$(CXX) -c $< -o $@ $(INCLUDES) -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$@"
 
 clean:
 	rm -f $(artifact)
 	rm -fr $(objs_dir)
 	rm -fr $(config_dir)
 	rm -fr $(build_dir)
+
+-include $(foreach obj,$(objs), $(obj:%.o=%.d))
