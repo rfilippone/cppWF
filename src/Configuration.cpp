@@ -41,6 +41,19 @@ std::string Configuration::get(const std::string& name)
     return instance()._get(name);
 }
 
+std::string Configuration::get(const std::string& name, std::string& defaultValue)
+{
+    try
+    {
+        return instance()._get(name);
+    }
+    catch (std::invalid_argument& e)
+    {
+        return defaultValue;
+    }
+}
+
+
 void Configuration::setInstance(Configuration* instance)
 {
     m_instance = instance;

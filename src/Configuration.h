@@ -24,6 +24,7 @@ public:
     static void setFile(std::string file);
 
     static std::string get(const std::string& name);
+    static std::string get(const std::string& name, std::string& defaultValue);
 
     static void setInstance(Configuration* instance);
 
