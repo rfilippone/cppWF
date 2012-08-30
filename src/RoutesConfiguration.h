@@ -39,6 +39,7 @@ private:
     std::string _get(const std::string& name);
 
     std::time_t m_lastTime;
+    std::string m_lastFile;
 
     RoutesMap m_routesMap;
 };

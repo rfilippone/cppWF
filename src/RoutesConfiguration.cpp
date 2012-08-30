@@ -18,7 +18,8 @@
 RoutesConfiguration* RoutesConfiguration::m_instance = NULL;
 
 RoutesConfiguration::RoutesConfiguration():
-        m_lastTime(0)
+        m_lastTime(0),
+        m_lastFile("")
 {
 
 }
@@ -58,9 +59,10 @@ void RoutesConfiguration::_init(const std::string& fileName)
 
     if (boost::filesystem::exists(config))
     {
-        if (boost::filesystem::last_write_time(config) > m_lastTime)
+        if (boost::filesystem::last_write_time(config) > m_lastTime || m_lastFile != fileName)
         {
             m_lastTime =  boost::filesystem::last_write_time(config);
+            m_lastFile = fileName;
 
             std::cerr << "***** loading routes configuration" << std::endl;
             m_routesMap.clear();
@@ -71,8 +73,14 @@ void RoutesConfiguration::_init(const std::string& fileName)
             BOOST_FOREACH(boost::property_tree::ptree::value_type route, pt)
             {
                 m_routesMap.insert(std::make_pair(route.first, route.second.data()));
+                std::cerr<< route.first << "=" << route.second.data() << std::endl;
             }
         }
+    }
+    else
+    {
+        m_lastTime = 0;
+        m_lastFile = "";
     }
 }
 
