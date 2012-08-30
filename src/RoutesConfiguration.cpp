@@ -11,6 +11,7 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include "Configuration.h"
 #include "RoutesConfiguration.h"
 
 
@@ -45,7 +46,8 @@ RoutesConfiguration& RoutesConfiguration::instance()
         m_instance = new RoutesConfiguration();
     }
 
-    m_instance->_init("../configs/routes.ini");
+    std::string defaultRoutesConfiguration("../configs/route.ini");
+    m_instance->_init(Configuration::get("routes", defaultRoutesConfiguration));
 
     return *m_instance;
 }
